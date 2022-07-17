@@ -1,6 +1,37 @@
+July 16, 2022
+    Added a potential fix for patron adventures not restarting with their patron.
+
+July 15, 2022
+    Updated Gem Farm documentation.
+
+July 14, 2022
+    Added timer to close tooltips after 3 seconds when an appropriate control is not being hovered over. This should help with tooltips stuck on screen after alt-tabbing.
+    Added messages indicating what the Briv Gem farm script is attempting to do when a button is clicked (Start/Stop/Connect/Save).
+    Added PreferredBrivJumpZones advanced setting built off of HenkyPenky's RollBackRecovery modifications.
+    IMPORTANT: REMOVED AvoidBosses setting! (Use PreferredBrivJumpZones to avoid bosses).
+    Updated Addons links in Addons.md.
+    Updated Imports for 32 bit to v457.
+
+July 6, 2022
+    Updated pointer for EngineSettings on v456 32 bit (where webroot is stored).
+    Removed including unused logging class.
+    When starting a gem farm, script requests a play server. This is a redundancy to accommodate load balancing when the game's play server cannot be read from memory.
+    Added a call to SetFormation after stacking to try to resolve the issue of the script jumping boss to boss after a rollback that lands on a boss area.
+    Added a Debug output for chest opening strings. This allows a savvy user to monitor when shiny gear is obtained from the chest opening calls while gem farming. (These messages will show up in programs such as DebugView).
+    Updated Imports for v456 (32 and 64 bit).
+
+July 2, 2022
+    Fixed a bug that could cause memory to fail to read for Hero Handlers when the game uses high value memory addresses (int overflow).
+    Added protection for hero handlers potentially failing when the IdleGameManager pointer needs to be updated/changed.
+    Update to MemoryFunctions for future IdleGameManager memory reading safety. 
+
+July 1, 2022
+    Reverted pointers for EGS (64-bit) v455.
+    Updated offsets/Imports for v455 for 32/64-bit.
+
 June 24, 2022
-    Updated pointers for EGS (64-bit) v452
-    Updated pointers for Steam (32-bit) v452
+    Updated pointers for EGS (64-bit) v452.
+    Updated pointers for Steam (32-bit) v452.
     
 June 2, 2022
     Updated Readme.md for SharedFunctions.
@@ -224,7 +255,7 @@ Jan 13, 2022
     Gem Farm script GUI will be shown again when pressing the play button if it is already open.
 
 Jan 12, 2022
-    Added offsets for where modron formations are stored, as well as FormationCampaignID  and SaveID in teh FormationSaveHandler.
+    Added offsets for where modron formations are stored, as well as FormationCampaignID  and SaveID in the FormationSaveHandler.
     Added memory functions:
         ReadFormationSaveIDBySlot
         ReadFormationCampaignID

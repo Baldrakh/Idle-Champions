@@ -141,6 +141,7 @@ class IC_BrivGemFarm_Class
             return
         g_SF.CurrentAdventure := g_SF.Memory.ReadCurrentObjID()
         g_SF.ResetServerCall()
+        g_ServerCall.UpdatePlayServer()
         g_SF.GameStartFormation := g_BrivUserSettings[ "BrivJumpBuffer" ] > 0 ? 3 : 1
         g_SaveHelper.Init() ; slow call, loads briv dictionary (3+s)
         formationModron := g_SF.Memory.GetActiveModronFormation()
@@ -320,6 +321,8 @@ class IC_BrivGemFarm_Class
             this.StackRestart()
         else if (stacks < g_BrivUserSettings[ "TargetStacks" ])
             this.StackNormal()
+        ; SetFormation needs to occur before dashwait in case game erronously placed party on boss zone after stack restart
+        g_SF.SetFormation(g_BrivUserSettings) 
         if (g_SF.ShouldDashWait())
             g_SF.DoDashWait( Max(g_SF.ModronResetZone - g_BrivUserSettings[ "DashWaitBuffer" ], 0) )
     }
@@ -340,6 +343,7 @@ class IC_BrivGemFarm_Class
         {
             retryAttempt++
             this.StackFarmSetup()
+            g_SF.CurrentZone := g_SF.Memory.ReadCurrentZone() ; record current zone before saving for bad progression checks
             g_SF.CloseIC( "StackRestart" )
             g_SharedData.LoopString := "Stack Sleep"
             var := this.DoChests()
@@ -359,6 +363,7 @@ class IC_BrivGemFarm_Class
                 Break  ; "Bad Save? Loaded below stack zone, see value."
             }
         }
+        OutputDebug, % var
         g_PreviousZoneStartTime := A_TickCount
         return
     }
@@ -574,7 +579,7 @@ class IC_BrivGemFarm_Class
         }
         if ( var == "" )
         {
-            return "No chests opened or purchased."
+            return " No chests opened or purchased."
         }
         else
         {

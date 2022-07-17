@@ -29,7 +29,7 @@ GetScriptHubVersion()
 ;server call functions and variables Included after GUI so chest tabs maybe non optimal way of doing it
 #include %A_ScriptDir%\ServerCalls\IC_ServerCalls_Class.ahk
 ;logging functions
-#include %A_ScriptDir%\Logging\IC_Log_Class.ahk
+;#include *i %A_ScriptDir%\Logging\IC_Log_Class.ahk
 
 global g_KeyMap := KeyHelper.BuildVirtualKeysMap()
 global g_ServerCall
@@ -146,9 +146,17 @@ BuildToolTips()
 ; Shows a tooltip if the control with mouseover has a tooltip associated with it.
 CheckControlForTooltip()
 {
-    MouseGetPos,,,, VarControl
-    Message := g_MouseToolTips[VarControl]
-    ToolTip % Message
+        MouseGetPos,,,, VarControl
+        if(VarControl)
+            ToolTip % g_MouseToolTips[VarControl]
+        else
+            ToolTip
+        SetTimer, HideToolTip, -3000
+}
+
+HideToolTip()
+{
+    ToolTip
 }
 
 #include *i %A_ScriptDir%\AddOns\AddOnsIncluded.ahk

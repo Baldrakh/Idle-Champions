@@ -29,6 +29,8 @@ class IC_SharedData_Class
     PurchasedSilverChests := 0
     ShinyCount := 0
     TriggerStart := false
+    TotalRollBacks := 0
+    BadAutoProgress := 0
 
     Close()
     {
@@ -79,6 +81,8 @@ class IC_SharedFunctions_Class
     ErrorKeyUp := 0
     GameStartFormation := 1
     ModronResetZone := 0
+    CurrentZone := ""
+    Settings := ""
 
     __new()
     {
@@ -409,6 +413,7 @@ class IC_SharedFunctions_Class
         while ( ElapsedTime < timeout AND this.Memory.ReadCurrentZone() < DashWaitMaxZone AND !this.IsDashActive() )
         {
             this.ToggleAutoProgress(0)
+            this.SetFormation()
             ElapsedTime := A_TickCount - StartTime
             g_SharedData.LoopString := "Dash Wait: " . ElapsedTime . " / " . estimate
         }
@@ -548,16 +553,20 @@ class IC_SharedFunctions_Class
     ; a method to swap formations and cancel briv's jump animation.
     SetFormation(settings := "")
     {
+        if(settings != "")
+        {
+            this.Settings := settings
+        }
         ;only send input messages if necessary
         brivBenched := this.Memory.ReadChampBenchedByID(58)
         ;check to bench briv
-        if (!brivBenched AND this.BenchBrivConditions(settings))
+        if (!brivBenched AND this.BenchBrivConditions(this.Settings))
         {
             this.DirectedInput(,,["{e}"]*)
             g_SharedData.SwapsMadeThisRun++
         }
         ;check to unbench briv
-        else if (brivBenched AND this.UnBenchBrivConditions(settings))
+        else if (brivBenched AND this.UnBenchBrivConditions(this.Settings))
         {
             this.DirectedInput(,,["{q}"]*)
             g_SharedData.SwapsMadeThisRun++
@@ -576,8 +585,8 @@ class IC_SharedFunctions_Class
         ;bench briv if jump animation override is added to list and it isn't a quick transition (reading ReadFormationTransitionDir makes sure QT isn't read too early)
         if (this.Memory.ReadTransitionOverrideSize() == 1 AND this.Memory.ReadTransitionDirection() != 2 AND this.Memory.ReadFormationTransitionDir() == 3 )
             return true
-        ;bench briv if avoid bosses setting is on and on a boss zone
-        if (settings[ "AvoidBosses" ] AND !Mod( this.Memory.ReadCurrentZone(), 5 ))
+        ;bench briv not in a preferred briv jump zone
+        if (settings["PreferredBrivJumpZones"][Mod( this.Memory.ReadCurrentZone(), 50) == 0 ? 50 : Mod( this.Memory.ReadCurrentZone(), 50) ] == 0)
             return true
         ;perform no other checks if 'Briv Jump Buffer' setting is disabled
         if !(settings[ "BrivJumpBuffer" ])
@@ -593,8 +602,8 @@ class IC_SharedFunctions_Class
     ; True/False on whether Briv should be unbenched based on game conditions.
     UnBenchBrivConditions(settings)
     {
-        ;keep Briv benched if 'Avoid Bosses' setting is enabled and on a boss zone
-        if (settings[ "AvoidBosses" ] AND !Mod( this.Memory.ReadCurrentZone(), 5 ))
+        ; do not unbench briv if party is not on a perferred briv jump zone.
+        if (settings["PreferredBrivJumpZones"][Mod( this.Memory.ReadCurrentZone(), 50) == 0 ? 50 :  Mod(this.Memory.ReadCurrentZone(), 50)] == 0)
             return false
         ;unbench briv if 'Briv Jump Buffer' setting is disabled and transition direction is "OnFromLeft"
         if (!(settings[ "BrivJumpBuffer" ]) AND this.Memory.ReadFormationTransitionDir() == 0)
@@ -751,6 +760,7 @@ class IC_SharedFunctions_Class
             if(this.Memory.ReadResetting() AND this.Memory.ReadCurrentZone() <= 1 AND this.Memory.ReadCurrentObjID() == "")
                 this.WorldMapRestart()
             this.RecoverFromGameClose(this.GameStartFormation)
+            this.BadSaveTest()
             return false
         }
          ; game loaded but can't read zone? failed to load proper on last load? (Tests if game started without script starting it)
@@ -763,6 +773,14 @@ class IC_SharedFunctions_Class
             this.ResetServerCall()
         }
         return true
+    }
+
+    BadSaveTest()
+    {
+        if(this.CurrentZone != "" and this.CurrentZone - 1 > g_SF.Memory.ReadCurrentZone())
+            g_SharedData.TotalRollBacks++
+        else if (this.CurrentZone != "" and this.CurrentZone < g_SF.Memory.ReadCurrentZone())
+            g_SharedData.BadAutoProgress++
     }
 
     ; Reloads memory reads after game has closed. For updating GUI.
@@ -1041,7 +1059,7 @@ class IC_SharedFunctions_Class
         g_ServerCall.webroot := isWebRootValid ? this.Memory.ReadWebRoot() : g_ServerCall.webroot
         g_ServerCall.networkID := this.Memory.ReadPlatform() ? this.Memory.ReadPlatform() : g_ServerCall.networkID
         g_ServerCall.activeModronID := this.Memory.ReadActiveGameInstance() ? this.Memory.ReadActiveGameInstance() : 1 ; 1, 2, 3 for modron cores 1, 2, 3
-        g_ServerCall.activePatronID := this.Memory.ReadPatronID() ; 0 = no patron
+        g_ServerCall.activePatronID := this.Memory.ReadPatronID() ? this.Memory.ReadPatronID() : g_ServerCall.activePatronID  ; 0 = no patron
         g_ServerCall.UpdateDummyData()
     }
 

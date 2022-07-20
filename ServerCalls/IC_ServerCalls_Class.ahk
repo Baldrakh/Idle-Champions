@@ -39,7 +39,7 @@ class IC_ServerCalls_Class
 
     GetVersion()
     {
-        return "IC_ServerCalls_Class: v2.2, 01/10/2022"
+        return "IC_ServerCalls_Class: v2.4, 2022-07-17"
     }
 
     UpdateDummyData()
@@ -91,7 +91,7 @@ class IC_ServerCalls_Class
 
     CallLoadAdventure( adventureToLoad ) 
     {
-        patronTier := this.activePatronID ? this.activePatronID : 0
+        patronTier := this.activePatronID ? 1 : 0
         advParams := this.dummyData . "&patron_tier=" . patronTier . "&user_id=" . this.userID . "&hash=" . this.userHash . "&instance_id=" . this.instanceID 
             . "&game_instance_id=" . this.activeModronID . "&adventure_id=" . adventureToLoad . "&patron_id=" . this.activePatronID
         return this.ServerCall( "setcurrentobjective", advParams )

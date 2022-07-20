@@ -842,14 +842,15 @@ class IC_SharedFunctions_Class
         ElapsedTime := counter := 0
         while(!isCurrentFormation AND ElapsedTime < timeout AND !this.Memory.ReadNumAttackingMonstersReached())
         {
-            ElapsedTime := A_TickCount - StartTime
             isCurrentFormation := this.IsCurrentFormation( formationFavorite )
+            ElapsedTime := A_TickCount - StartTime
             if(ElapsedTime > sleepTime * counter AND IsObject(spam))
             {
                 this.DirectedInput(,, spam* )
                 counter++
             }
         }
+        isCurrentFormation := this.IsCurrentFormation( formationFavorite )
         ;spam.Push(this.GetFormationFKeys(formationFavorite1)*) ; make sure champions are leveled
         ;;;if ( this.Memory.ReadNumAttackingMonstersReached() OR this.Memory.ReadNumRangedAttackingMonsters() )
             g_SharedData.LoopString := "Under attack. Retreating to change formations..."
@@ -1059,7 +1060,7 @@ class IC_SharedFunctions_Class
         g_ServerCall.webroot := isWebRootValid ? this.Memory.ReadWebRoot() : g_ServerCall.webroot
         g_ServerCall.networkID := this.Memory.ReadPlatform() ? this.Memory.ReadPlatform() : g_ServerCall.networkID
         g_ServerCall.activeModronID := this.Memory.ReadActiveGameInstance() ? this.Memory.ReadActiveGameInstance() : 1 ; 1, 2, 3 for modron cores 1, 2, 3
-        g_ServerCall.activePatronID := this.Memory.ReadPatronID() ? this.Memory.ReadPatronID() : g_ServerCall.activePatronID  ; 0 = no patron
+        g_ServerCall.activePatronID := this.Memory.ReadPatronID() == "" ? g_ServerCall.activePatronID : this.Memory.ReadPatronID() ; 0 = no patron
         g_ServerCall.UpdateDummyData()
     }
 
